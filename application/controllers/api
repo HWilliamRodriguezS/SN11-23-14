@@ -1,0 +1,47 @@
+<?php
+	require APPPATH.'/libraries/REST_Controller.php';
+	
+	class api extends REST_Controller{
+		
+		function __construct(){
+			// Call the Model constructor
+			parent::__construct();
+			$this->load->model('api_model');  
+			$this->load->library('My_PHPMailer');
+		}
+		
+		function member_get(){
+			$data = $this->api_model->getMember($this);  
+			
+			if($data){  
+					$this->response($data, 200); // 200 being the HTTP response code  
+			} else {  
+				$this->response(array('error' => 'No se encontro el usuario'), 404);
+			} 
+		}		
+		
+		function member_post(){  			
+			$id =  $this->api_model->create('member');  
+			
+			if($id != null){  
+				$this->response($id, 200); // 200 being the HTTP response code  
+			} else {  
+				$this->response(array('error' => 'Error guardando member'), 404);
+			}
+			
+		}  
+		
+		
+		
+		/** Lista de Parametros **/
+		function parameters_get(){
+			$data = $this->api_model->getParameters($this);  
+			
+			if($data){  
+					$this->response($data, 200); // 200 being the HTTP response code  
+			} else {  
+				$this->response(array('error' => 'No se encontraron los paises'), 404);
+			}
+		}		
+	}
+?>
