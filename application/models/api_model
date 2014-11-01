@@ -1,0 +1,98 @@
+<?php
+class Api_Model extends CI_Model {
+  
+	function __construct(){
+        // Call the Model constructor
+        parent::__construct();
+    }
+
+	function create($table){			
+		$_POST['REGISTRY_DATE'] =  date('ymdHi');
+
+		$this->db->insert($table, $_POST);
+		$insert_id = $this->db->insert_id();
+
+		return $insert_id;
+	}
+	function update($table,$tableIdName){			
+		$_POST['MODIFY_DATE'] =  date('ymdHi');		
+		
+        $this->db->where($tableIdName, $_POST[$tableIdName]);
+		$this->db->update($table, $_POST); 
+    }
+	
+	function delete($table,$tableIdName){
+		$this->db->where($tableIdName,$_POST[$tableIdName]);
+		$this->db->delete($table); 
+	}
+	
+	
+	function retrieve($table){	
+		$datos = $this->db->get($table);
+		return $datos->result();
+	}
+	
+	function retrieveById($table,$idname,$id){	
+		$this->db->where($idname, $id);
+		$datos = $this->db->get($table);
+		return $datos->result();
+	}
+	function getParameters($data){
+		$this->db->where('ID_MASTER_TABLE_FK', $data->get('id'));
+		$datos = $this->db->get('PARAMETER_TABLE');
+		return $datos->result();
+	}
+	
+	function getPayments($filter){
+	
+	}
+	
+	function getMember($filter){
+		$this->db->select("m.ID_MEMBER_PK, 
+        						   m.NAME,
+        						   m.LAST_NAME,
+        						   m.DISPLAY_NAME,
+        						   m.PHONE_NUMBER,
+        						   m.EMAIL,
+        						   m.BIRTHDAY,
+        						   (SELECT PARAMETER_NAME FROM PARAMETER_TABLE WHERE ID_PARAMETER_TABLE_PK= m.GENDER) GENDER,
+        						   m.DISPLAY_PHOTO,
+        						   m.USER_NAME,
+        						   (SELECT PARAMETER_NAME FROM PARAMETER_TABLE WHERE ID_PARAMETER_TABLE_PK= m.MEMBER_STATE) MEMBER_STATE,
+        						   m.REGISTRY_DATE,
+        						   m.REGISTRY_USER,
+        						   m.MODIFY_USER,
+        						   m.MODIFY_DATE");
+		$this->db->from("member m");
+		
+		if($filter->get('gender')!=null){			
+			$this->db->where("m.GENDER",$filter->get('gender'));
+		}
+		
+		if($filter->get('state')!=null){			
+			$this->db->where("m.MEMBER_STATE",$filter->get('state'));
+		}
+		
+		if($filter->get('name')!=null){			
+			$this->db->like("m.NAME",$filter->get('name'));
+		}
+		
+		if($filter->get('lastname')!=null){			
+			$this->db->like("m.LAST_NAME",$filter->get('lastname'));
+		}
+		$datos = $this->db->get();
+		return $datos->result();
+	}
+	
+    
+    function MaxId($table,$idname){
+        $this->db->select("max($idname) as maxId");
+        $this->db->from($table);
+        $datos = $this->db->get();
+        return $datos->result();
+    }   
+
+ 
+}
+
+?>
